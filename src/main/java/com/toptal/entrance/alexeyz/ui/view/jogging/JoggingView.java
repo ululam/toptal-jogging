@@ -1,4 +1,4 @@
-package com.toptal.entrance.alexeyz.ui.view;
+package com.toptal.entrance.alexeyz.ui.view.jogging;
 
 /**
  * @author alexey.zakharchenko@gmail.com

@@ -1,13 +1,9 @@
-package com.toptal.entrance.alexeyz.ui.view;
+package com.toptal.entrance.alexeyz.ui.view.jogging;
 
 import com.toptal.entrance.alexeyz.domain.User;
-import com.toptal.entrance.alexeyz.repo.UserRepository;
-import com.toptal.entrance.alexeyz.ui.JoggingUI;
 import com.toptal.entrance.alexeyz.ui.form.UserForm;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.vaadin.viritin.button.ConfirmButton;
 import org.vaadin.viritin.button.MButton;
 import org.vaadin.viritin.fields.MTable;
@@ -17,11 +13,11 @@ import org.vaadin.viritin.layouts.MVerticalLayout;
 /**
  * @author alexey.zakharchenko@gmail.com
  */
-public class UsersTab extends MVerticalLayout {
+class UsersTab extends MVerticalLayout {
     private MTable<User> usersTable = new MTable<>(User.class)
             .withProperties("id", "login", "role", "createdAt")
             .withColumnHeaders("Id", "Login", "Role", "Created At")
-            .setSortableProperties("week")
+            .setSortableProperties("login")
             .withFullWidth();
 
 
@@ -31,79 +27,79 @@ public class UsersTab extends MVerticalLayout {
             "Are you sure you want to delete this user?", this::remove);
 
 
-    @Autowired
-    private final UserRepository userRepository;
-
     private final JoggingUI ui;
 
-
-    public UsersTab(JoggingUI ui) {
+    UsersTab(JoggingUI ui) {
         this.ui = ui;
-        this.userRepository = ui.userRepository;
     }
 
-    public UsersTab init() {
+    UsersTab init() {
         addComponent(new MHorizontalLayout(addNew, edit, delete));
         addComponent(usersTable);
 
-        listUsers();
+        reloadUsers();
 
         usersTable.addMValueChangeListener(e -> adjustActionButtonState());
+
+//        usersTable.addItemClickListener((e) -> {
+//            if (e.isDoubleClick())
+//                edit(usersTable.getValue());
+//        });
 
         return this;
     }
 
-    private void listUsers() {
-        usersTable.setBeans(userRepository.findAll());
+    private void reloadUsers() {
+        usersTable.setBeans(ui.userRepository.findAll());
 
         adjustActionButtonState();
     }
 
 
-    protected void adjustActionButtonState() {
+    private void adjustActionButtonState() {
         boolean hasSelection = usersTable.getValue() != null;
         edit.setEnabled(hasSelection);
         delete.setEnabled(hasSelection);
     }
 
-    public void add(Button.ClickEvent clickEvent) {
+    private void add(Button.ClickEvent clickEvent) {
         User user = new User();
         edit(user);
     }
 
-    public void edit(Button.ClickEvent e) {
+    private void edit(Button.ClickEvent e) {
         edit(usersTable.getValue());
     }
 
-    public void remove(Button.ClickEvent e) {
+    private void remove(Button.ClickEvent e) {
         if (usersTable.getValue() != null) {
-            userRepository.delete(usersTable.getValue().getId());
+            ui.userRepository.delete(usersTable.getValue().getId());
             usersTable.setValue(null);
-            listUsers();
+            reloadUsers();
         }
     }
 
-    protected void edit(User entry) {
+    private void edit(User entry) {
+        if (entry == null)
+            return;
+
         UserForm form = new UserForm(entry);
-        form.openInModalPopup();
         form.setSavedHandler(this::saveEntry);
         form.setResetHandler(this::resetEntry);
+
+        form.openInModalPopup();
     }
 
-    public void saveEntry(User entry) {
-        userRepository.save(entry);
+    private void saveEntry(User entry) {
+        ui.userRepository.save(entry);
 
-        listUsers();
-        closeWindow();
+        reloadUsers();
+        ui.closeWindow();
     }
 
-    public void resetEntry(User entry) {
-        listUsers();
-        closeWindow();
-    }
-
-    protected void closeWindow() {
-        ui.getWindows().stream().forEach(w -> ui.removeWindow(w));
+    private void resetEntry(User entry) {
+        reloadUsers();
+        ui.closeWindow();
     }
 
 }

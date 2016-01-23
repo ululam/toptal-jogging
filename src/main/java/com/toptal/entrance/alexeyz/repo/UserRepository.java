@@ -1,6 +1,5 @@
 package com.toptal.entrance.alexeyz.repo;
 
-import com.toptal.entrance.alexeyz.domain.Jog;
 import com.toptal.entrance.alexeyz.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 

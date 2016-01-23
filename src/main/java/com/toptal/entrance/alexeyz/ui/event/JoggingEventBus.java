@@ -3,7 +3,7 @@ package com.toptal.entrance.alexeyz.ui.event;
 import com.google.gwt.thirdparty.guava.common.eventbus.EventBus;
 import com.google.gwt.thirdparty.guava.common.eventbus.SubscriberExceptionContext;
 import com.google.gwt.thirdparty.guava.common.eventbus.SubscriberExceptionHandler;
-import com.toptal.entrance.alexeyz.ui.JoggingUI;
+import com.toptal.entrance.alexeyz.ui.view.jogging.JoggingUI;
 
 /**
  * @author alexey.zakharchenko@gmail.com

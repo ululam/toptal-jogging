@@ -108,16 +108,19 @@ public final class Utils {
         return String.format("%.2f", f);
     }
 
-    public static String[] toHMS(int timeSec) {
-        int h = timeSec / 3600;
-        int m = (timeSec - 3600 * h) / 60;
-        int s = timeSec - 3600*h - 60*m;
+    public static int[] toHMS(long timeMs) {
+        long timeSec = timeMs / 1000;
+        int h = (int) (timeSec / 3600);
+        int m = (int) ((timeSec - 3600 * h) / 60);
+        int s = (int) (timeSec - 3600*h - 60*m);
 
-        return new String[] {valueOf(h), valueOf(m), valueOf(s)};
+
+        return new int[] {h,m,s};
     }
 
-    public static String formatHMS(int timeSec) {
-        String[] hms = toHMS(timeSec);
+    public static String formatHMS(long timeSec) {
+        int[] hmsInt = toHMS(timeSec);
+        String[] hms = new String[] {valueOf(hmsInt[0]), valueOf(hmsInt[1]), valueOf(hmsInt[2])};
         if (hms[0].length() == 1)
             hms[0] = "0" + hms[0];
         if (hms[1].length() == 1)

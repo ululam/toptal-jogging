@@ -6,9 +6,9 @@ import com.toptal.entrance.alexeyz.repo.JoggingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,7 +16,7 @@ import java.util.List;
  */
 @RestController
 public class JoggingController {
-    private static final Logger log = LoggerFactory.getLogger(JoggingController2.class);
+    private static final Logger log = LoggerFactory.getLogger(JoggingController.class);
 
     private final JoggingRepository repo;
 
@@ -27,12 +27,12 @@ public class JoggingController {
 
     @RequestMapping("/jog/list")
     public List<Jog> list() {
-        return repo.findAll();
+        return repo.findAllWithParameters(new Date(0), new Date(), 0);
     }
 
     @RequestMapping("/week/list")
     public List<Week> weeks() {
-        return repo.getWeeks();
+        return repo.getWeeks(0);
     }
 
 

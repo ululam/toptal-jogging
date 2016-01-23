@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Transient;
-import java.text.DateFormat;
 import java.util.Date;
 
 /**
@@ -21,14 +20,19 @@ public class Jog {
     @GeneratedValue
     private Long id;
 
-    private int distance;
-    private int time;
+    // Kilometers
+    private float distance;
+    // Milliseconds
+    private long time;
+
     private Date date;
 
+    private long userId;
 
     public Jog() {}
 
-    public Jog(Date date, int distance, int time) {
+    public Jog(long userId, Date date, float distance, long time) {
+        this.userId = userId;
         this.date = date;
         this.distance = distance;
         this.time = time;
@@ -39,19 +43,20 @@ public class Jog {
     }
 
 
-    public int getDistance() {
+    public float getDistance() {
         return distance;
     }
 
-    public void setDistance(int distance) {
+    public void setDistance(float distance) {
         this.distance = distance;
     }
 
-    public int getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+
+    public void setTime(long time) {
         this.time = time;
     }
 
@@ -59,6 +64,13 @@ public class Jog {
         return date;
     }
 
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
 
     public void setDate(Date date) {
         this.date = date;
@@ -74,7 +86,10 @@ public class Jog {
 
     @Transient
     public float getAverageSpeed() {
-        return (float) distance / time;
+        if (distance == 0 || time == 0)
+            return 0;
+
+        return 3_600_000 * distance / time;
     }
 
     @Override
