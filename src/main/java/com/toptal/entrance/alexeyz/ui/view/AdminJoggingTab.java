@@ -1,4 +1,4 @@
-package com.toptal.entrance.alexeyz.ui.view.jogging;
+package com.toptal.entrance.alexeyz.ui.view;
 
 import com.toptal.entrance.alexeyz.domain.Jog;
 import com.toptal.entrance.alexeyz.ui.form.JoggingForm;
@@ -18,21 +18,19 @@ import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 /**
  * @author alexey.zakharchenko@gmail.com
  */
-class JoggingTab extends MVerticalLayout {
+class AdminJoggingTab extends MVerticalLayout {
     private MTable<Jog> joggingTable = new MTable<>(Jog.class)
-            .withProperties("date", "distance", "time", "averageSpeed")
-            .withColumnHeaders("Date", "Distance, km", "Time", "Average Speed, km/h")
-            .setSortableProperties("date")
+            .withProperties("userId", "date", "distance", "time", "averageSpeed")
+            .withColumnHeaders("UserId", "Date", "Distance, km", "Time", "Average Speed, km/h")
+            .setSortableProperties("date", "userId")
             .withFullWidth();
 
-    private Button addNewButton = new MButton(FontAwesome.PLUS, this::add);
     private Button editButton = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
     private Button deleteButton = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete this entry?", this::remove);
@@ -40,15 +38,14 @@ class JoggingTab extends MVerticalLayout {
     private DateField fromDateField = new MDateField("From").withIcon(FontAwesome.ARROW_LEFT);
     private DateField toDateField = new MDateField("To").withIcon(FontAwesome.ARROW_RIGHT);;
 
+    private final MainView view;
 
-    private final JoggingUI ui;
-
-    JoggingTab(JoggingUI ui) {
-        this.ui = ui;
+    AdminJoggingTab(MainView view) {
+        this.view = view;
     }
 
-    JoggingTab init() {
-        addComponent(new MHorizontalLayout(addNewButton, editButton, deleteButton, fromDateField, toDateField));
+    AdminJoggingTab init() {
+        addComponent(new MHorizontalLayout(editButton, deleteButton, fromDateField, toDateField));
         addComponent(joggingTable);
         expand(joggingTable);
 
@@ -58,11 +55,6 @@ class JoggingTab extends MVerticalLayout {
         toDateField.addValueChangeListener(this::datesChanged);
 
         joggingTable.addMValueChangeListener(e -> adjustActionButtonState());
-
-//        joggingTable.addItemClickListener((e) -> {
-//            if (e.isDoubleClick())
-//                edit(joggingTable.getValue());
-//        });
 
         reloadData();
 
@@ -98,8 +90,6 @@ class JoggingTab extends MVerticalLayout {
         deleteButton.setEnabled(hasSelection);
     }
 
-    static final int PAGESIZE = 50;
-
     void reloadData() {
         Date fromDate = fromDateField.getValue();
         if (fromDate == null)
@@ -109,19 +99,7 @@ class JoggingTab extends MVerticalLayout {
         if (toDate == null)
             toDate = new Date();
 
-        long userId = ui.currentUser().getId();
-
-        joggingTable.setBeans(ui.joggingRepository.findAllWithParameters(fromDate, toDate, userId));
-
-        // Note: fetching strategies can be given toDateField MTable constructor as well.
-//        joggingTable.setBeans(new SortableLazyList<>(
-//                // entity fetching strategy
-//                (firstRow, asc, sortProperty) -> joggingRepository.findAllWithParameters(fromDate, toDate, userId),
-//                // count fetching strategy
-//                () -> joggingRepository.findAll().size(),
-//                PAGESIZE
-//        ));
-
+        joggingTable.setBeans(view.ui.joggingRepository.findAllWithParameters(fromDate, toDate));
 
         adjustActionButtonState();
     }
@@ -130,23 +108,15 @@ class JoggingTab extends MVerticalLayout {
         reloadData();
     }
 
-    private void add(Button.ClickEvent clickEvent) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date(0));
-
-        Jog jog = new Jog(ui.currentUser().getId(), new Date(), 0, 0);
-        edit(jog);
-    }
-
     private void edit(Button.ClickEvent e) {
         edit(joggingTable.getValue());
     }
 
     private void remove(Button.ClickEvent e) {
         if (joggingTable.getValue() != null) {
-            ui.joggingRepository.delete(joggingTable.getValue().getId());
+            view.ui.joggingRepository.delete(joggingTable.getValue().getId());
             joggingTable.setValue(null);
-            ui.onJogChange();
+            view.onJogChange();
         }
     }
 
@@ -162,14 +132,14 @@ class JoggingTab extends MVerticalLayout {
     }
 
     private void saveEntry(Jog entry) {
-        ui.joggingRepository.save(entry);
-        ui.onJogChange();
-        ui.closeWindow();
+        view.ui.joggingRepository.save(entry);
+        view.onJogChange();
+        view.ui.closeWindow();
     }
 
     private void resetEntry(Jog entry) {
-        ui.onJogChange();
-        ui.closeWindow();
+        view.onJogChange();
+        view.ui.closeWindow();
     }
 
 }

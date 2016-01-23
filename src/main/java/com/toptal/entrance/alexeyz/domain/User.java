@@ -1,8 +1,8 @@
 package com.toptal.entrance.alexeyz.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import com.toptal.entrance.alexeyz.util.UserUtil;
+
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -10,8 +10,13 @@ import java.util.Date;
  */
 @Entity
 public class User {
+    public static final int PASSWORD_HASH_LENGTH = 32;
+    public static final int MAX_PASSWORD_LENGTH = PASSWORD_HASH_LENGTH - 1;
+    public static final int MIN_PASSWORD_LENGTH = 3;
+    public static final int MIN_LOGIN_LENGTH = MIN_PASSWORD_LENGTH;
+
     public enum Role {
-        admin, user
+        admin, manager, user
     }
 
     @Id
@@ -70,5 +75,23 @@ public class User {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    @Transient
+    public boolean isAdmin() {
+        return this.role == Role.admin;
+    }
+
+    @Transient
+    public boolean isManager() {
+        return this.role == Role.admin || this.role == Role.manager;
+    }
+
+    @PrePersist
+    @PreUpdate
+    void encryptPassword() {
+        if (password.length() < MAX_PASSWORD_LENGTH)
+            // It means password is not hashed
+            setPassword(UserUtil.hash(password));
     }
 }

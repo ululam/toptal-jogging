@@ -2,7 +2,7 @@ package com.toptal.entrance.alexeyz.rest;
 
 import com.toptal.entrance.alexeyz.domain.Jog;
 import com.toptal.entrance.alexeyz.domain.Week;
-import com.toptal.entrance.alexeyz.repo.JoggingRepository;
+import com.toptal.entrance.alexeyz.db.JoggingRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

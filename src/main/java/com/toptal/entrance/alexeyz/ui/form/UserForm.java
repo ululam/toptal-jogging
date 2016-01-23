@@ -1,12 +1,11 @@
 package com.toptal.entrance.alexeyz.ui.form;
 
-import com.toptal.entrance.alexeyz.domain.Jog;
 import com.toptal.entrance.alexeyz.domain.User;
+import com.toptal.entrance.alexeyz.util.UserUtil;
+import com.vaadin.data.validator.StringLengthValidator;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
-import com.vaadin.ui.DateField;
 import com.vaadin.ui.TextField;
-import org.vaadin.viritin.fields.MDateField;
 import org.vaadin.viritin.fields.MTextField;
 import org.vaadin.viritin.form.AbstractForm;
 import org.vaadin.viritin.layouts.MFormLayout;
@@ -26,6 +25,18 @@ public class UserForm extends AbstractForm<User> {
     public UserForm(User user) {
         setSizeUndefined();
         setEntity(user);
+        // Only admin may create admins
+        if (!UserUtil.currentUser().isAdmin())
+            role.removeItem(User.Role.admin);
+
+        role.setNullSelectionAllowed(false);
+
+        login.addValidator(new StringLengthValidator("Username should be at least 3 chars long",
+                User.MIN_LOGIN_LENGTH, 1024, false));
+        password.addValidator(new StringLengthValidator("Password should be bettween" + User.MIN_PASSWORD_LENGTH
+                + " and " + User.MAX_PASSWORD_LENGTH + " char length",
+                User.MIN_PASSWORD_LENGTH, User.MAX_PASSWORD_LENGTH, false));
+
     }
 
     @Override

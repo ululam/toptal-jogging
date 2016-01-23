@@ -1,4 +1,4 @@
-package com.toptal.entrance.alexeyz.repo;
+package com.toptal.entrance.alexeyz.db;
 
 import com.toptal.entrance.alexeyz.domain.Jog;
 import com.toptal.entrance.alexeyz.domain.Week;
@@ -23,4 +23,11 @@ public interface JoggingRepository extends JpaRepository<Jog, Long> {
             "WHERE jog.date >= :fromDate AND jog.date <= :toDate AND jog.userId = :userId " +
             "ORDER BY jog.date")
     List<Jog> findAllWithParameters(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate, @Param("userId") long userId);
+
+    @Query("FROM Jog jog " +
+            "WHERE jog.date >= :fromDate AND jog.date <= :toDate " +
+            "ORDER BY jog.date")
+    List<Jog> findAllWithParameters(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
+    void deleteByUserId(long userId);
 }

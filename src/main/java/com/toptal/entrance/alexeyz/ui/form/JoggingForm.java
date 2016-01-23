@@ -1,6 +1,7 @@
 package com.toptal.entrance.alexeyz.ui.form;
 
 import com.toptal.entrance.alexeyz.domain.Jog;
+import com.vaadin.data.util.converter.StringToFloatConverter;
 import com.vaadin.data.util.converter.StringToLongConverter;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.DateField;
@@ -20,8 +21,8 @@ import java.util.Locale;
 public class JoggingForm extends AbstractForm<Jog> {
 
     private final DateField date = new MDateField("Date");
-    private final TextField distance = new MTextField("Distance, km").withInputPrompt("Distance in kilometers");
-//    private final DateField time = new MDateField("Time").withResolution(Resolution.SECOND);
+    private final TextField distance = new MTextField("Distance, km")
+            .withInputPrompt("Distance in kilometers");
     private final TextField time = new TextField("Time, minutes");
 
 
@@ -30,23 +31,35 @@ public class JoggingForm extends AbstractForm<Jog> {
         setSizeUndefined();
         setEntity(jog);
 
+        distance.setConverter(new StringToFloatConverter() {
+            @Override
+            protected Number convertToNumber(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
+                try {
+                    return Float.valueOf(value);
+                } catch (Exception e) { return 0; }
+            }
+            @Override
+            public String convertToPresentation(Float value, Class<? extends String> targetType, Locale locale) throws ConversionException {
+                return String.format("%.1f", value);
+            }
+        });
+
         time.setConverter(new StringToLongConverter() {
             @Override
             protected Number convertToNumber(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
-                return (int) (Float.valueOf(value) * 60 * 1000);
+                try {
+                    return (int) (Float.valueOf(value) * 60 * 1000);
+                } catch (Exception e) { return 0; }
+
             }
 
             @Override
             public String convertToPresentation(Long value, Class<? extends String> targetType, Locale locale) throws ConversionException {
-                return String.format("%.2f", (float)value / 60_000);
+                return String.format("%.1f", (float)value / 60_000);
             }
         });
 
         date.setRangeEnd(new Date());
-//        distance.addValidator(new IntegerRangeValidator("Should be more than 0", 1, 100000));
-//        time.addValidator(new DoubleRangeValidator("Should be more than 0", 0.001d, 100000d));
-
-        //time.setDateFormat("hh:mm:ss");
     }
 
     @Override

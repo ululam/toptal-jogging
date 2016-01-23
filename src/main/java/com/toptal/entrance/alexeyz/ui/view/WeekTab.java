@@ -1,6 +1,7 @@
-package com.toptal.entrance.alexeyz.ui.view.jogging;
+package com.toptal.entrance.alexeyz.ui.view;
 
 import com.toptal.entrance.alexeyz.domain.Week;
+import com.toptal.entrance.alexeyz.util.UserUtil;
 import com.toptal.entrance.alexeyz.util.Utils;
 import com.vaadin.data.util.converter.StringToDateConverter;
 import com.vaadin.data.util.converter.StringToFloatConverter;
@@ -21,10 +22,10 @@ public class WeekTab extends MVerticalLayout {
             .setSortableProperties("week")
             .withFullWidth();
 
-    private final JoggingUI ui;
+    private final MainView view;
 
-    WeekTab(JoggingUI ui) {
-        this.ui = ui;
+    WeekTab(MainView view) {
+        this.view = view;
     }
 
     WeekTab init() {
@@ -38,7 +39,10 @@ public class WeekTab extends MVerticalLayout {
     }
 
     void reloadData() {
-        weeksTable.setBeans(ui.joggingRepository.getWeeks(ui.currentUser().getId()));
+        weeksTable.setBeans(
+                view.ui.joggingRepository.getWeeks(
+                        UserUtil.currentUser().getId())
+        );
     }
 
     private void setConverters() {

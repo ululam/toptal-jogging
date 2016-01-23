@@ -1,57 +1,42 @@
 package com.toptal.entrance.alexeyz.ui.event;
 
 
+import com.toptal.entrance.alexeyz.domain.Jog;
+
 /**
+ * System custom event classes
+ *
  * @author alexey.zakharchenko@gmail.com
  */
-public abstract class Events {
+public interface Events {
 
-    public static final class UserLoginRequestedEvent {
-        private final String userName, password;
+    class UserLoginRequestedEvent {
+        public final String userName, password;
 
         public UserLoginRequestedEvent(final String userName,
                                        final String password) {
             this.userName = userName;
             this.password = password;
         }
-
-        public String getUserName() {
-            return userName;
-        }
-
-        public String getPassword() {
-            return password;
-        }
     }
 
-    public static class BrowserResizeEvent {
+    class UserRegisterRequestedEvent {
 
     }
 
-    public static class UserLoggedOutEvent {
+    class JogChangedEvent {
+        public final Jog jog;
 
+        public JogChangedEvent(Jog jog) {
+            this.jog = jog;
+        }
     }
 
-    public static class NotificationsCountUpdatedEvent {
-    }
-
-    public static final class ReportsCountUpdatedEvent {
-        private final int count;
-
-        public ReportsCountUpdatedEvent(final int count) {
-            this.count = count;
-        }
-
-        public int getCount() {
-            return count;
-        }
+    class UserLoggedOutEvent {
 
     }
 
     public static class CloseOpenWindowsEvent {
-    }
-
-    public static class ProfileUpdatedEvent {
     }
 
 }

@@ -1,4 +1,4 @@
-package com.toptal.entrance.alexeyz.ui.view.jogging;
+package com.toptal.entrance.alexeyz.ui.view;
 
 import com.toptal.entrance.alexeyz.domain.User;
 import com.toptal.entrance.alexeyz.ui.form.UserForm;
@@ -10,14 +10,16 @@ import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
+import static com.toptal.entrance.alexeyz.util.UserUtil.*;
+
 /**
  * @author alexey.zakharchenko@gmail.com
  */
-class UsersTab extends MVerticalLayout {
+class UserTab extends MVerticalLayout {
     private MTable<User> usersTable = new MTable<>(User.class)
             .withProperties("id", "login", "role", "createdAt")
             .withColumnHeaders("Id", "Login", "Role", "Created At")
-            .setSortableProperties("login")
+            .setSortableProperties("login", "createdAt")
             .withFullWidth();
 
 
@@ -27,13 +29,13 @@ class UsersTab extends MVerticalLayout {
             "Are you sure you want to delete this user?", this::remove);
 
 
-    private final JoggingUI ui;
+    private final MainView view;
 
-    UsersTab(JoggingUI ui) {
-        this.ui = ui;
+    UserTab(MainView view) {
+        this.view = view;
     }
 
-    UsersTab init() {
+    UserTab init() {
         addComponent(new MHorizontalLayout(addNew, edit, delete));
         addComponent(usersTable);
 
@@ -41,16 +43,11 @@ class UsersTab extends MVerticalLayout {
 
         usersTable.addMValueChangeListener(e -> adjustActionButtonState());
 
-//        usersTable.addItemClickListener((e) -> {
-//            if (e.isDoubleClick())
-//                edit(usersTable.getValue());
-//        });
-
         return this;
     }
 
     private void reloadUsers() {
-        usersTable.setBeans(ui.userRepository.findAll());
+        usersTable.setBeans(view.ui.userRepository.findAll());
 
         adjustActionButtonState();
     }
@@ -58,8 +55,13 @@ class UsersTab extends MVerticalLayout {
 
     private void adjustActionButtonState() {
         boolean hasSelection = usersTable.getValue() != null;
+        boolean isMe = false, isAdmin = false;
+        if (hasSelection && currentUser() != null) {
+            isMe = currentUser().getId().equals(usersTable.getValue().getId());
+            isAdmin = usersTable.getValue().isAdmin();
+        }
         edit.setEnabled(hasSelection);
-        delete.setEnabled(hasSelection);
+        delete.setEnabled(hasSelection && !isMe && !isAdmin);
     }
 
     private void add(Button.ClickEvent clickEvent) {
@@ -73,7 +75,10 @@ class UsersTab extends MVerticalLayout {
 
     private void remove(Button.ClickEvent e) {
         if (usersTable.getValue() != null) {
-            ui.userRepository.delete(usersTable.getValue().getId());
+            long userId = usersTable.getValue().getId();
+            // Delete associated joggings (curently I don't rely upon many-to-one cascading)
+            view.ui.userRepository.delete(userId);
+//            view.ui.joggingRepository.deleteByUserId(userId);
             usersTable.setValue(null);
             reloadUsers();
         }
@@ -91,15 +96,15 @@ class UsersTab extends MVerticalLayout {
     }
 
     private void saveEntry(User entry) {
-        ui.userRepository.save(entry);
+        view.ui.userRepository.save(entry);
 
         reloadUsers();
-        ui.closeWindow();
+        view.ui.closeWindow();
     }
 
     private void resetEntry(User entry) {
         reloadUsers();
-        ui.closeWindow();
+        view.ui.closeWindow();
     }
 
 }
