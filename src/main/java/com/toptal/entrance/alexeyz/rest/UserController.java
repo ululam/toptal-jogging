@@ -19,7 +19,8 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
- * * REST User API
+ * REST User API
+ * <br>
  *
  * @author alexey.zakharchenko@gmail.com
  */
@@ -31,11 +32,30 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * <i>GET /rest/user/list</i>
+     * <br>
+     * <br>
+     * You must have Manager authority to call this method
+     *
+     * @return List of all users as JSON
+     */
     @RequestMapping("/list")
     @PreAuthorize("hasAuthority('manager')")
     public ResponseEntity<List<User>> list() {
         return new ResponseEntity<>(userRepository.findAll(), OK);
     }
+
+    /**
+     * <i>POST /rest/user/</i>
+     * <br>
+     * <br>
+     * No authorization required for this method (everyone can create user and use it later for accessing API)
+     *
+     * @param user User object as JSON
+     * @return Created User as JSON; 400 if login already exist, login or pwd are too short/long,
+     * on attempt to create Manager/Admin if current user is not Manager/Admin
+     */
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     // Anyone may create users
@@ -49,11 +69,22 @@ public class UserController {
         if (error != null)
             return error;
 
+
         user = userRepository.save(user);
 
         return new ResponseEntity<>(user, OK);
     }
 
+    /**
+     * <i>DELETE /rest/user/{id}</i>
+     * <br>
+     * <br>
+     * Delete user with the given id
+     *
+     * @param id Id of user in the system
+     *
+     * @return HTTP OK; 400 on attempt to delete Admin or yourself
+     */
     @PreAuthorize("hasAuthority('manager')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public ResponseEntity delete(@PathVariable("id") long id) {
@@ -72,6 +103,17 @@ public class UserController {
         return new ResponseEntity<>(OK);
     }
 
+    /**
+     * <i>PUT /rest/user/</i>
+     * <br>
+     * <br>
+     * Update the given user (based on id)
+     *
+     * @param user User object as JSON
+     *
+     * @return HHTP OK; 404 if user not found, 400 if login or pwd are too short/long,
+     * on attempt to create Manager/Admin if current user is not Manager/Admin
+     */
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('manager')")
     public ResponseEntity update(@RequestBody User user) {
@@ -80,9 +122,6 @@ public class UserController {
             return new ResponseEntity<>("User with the given id does not exist: " + user.getId(), NOT_FOUND);
 
         User current = currentUser();
-        if (!current.isManager() && current.getId().equals(user.getId()))
-            // For simple users, its prohibited to update others
-            return new ResponseEntity<>("You should be at least Manager to update others", BAD_REQUEST);
 
         ResponseEntity error = validate(user);
         if (error != null)
@@ -103,6 +142,12 @@ public class UserController {
                 || user.getPassword().length() > User.MAX_PASSWORD_LENGTH)
             return new ResponseEntity<>("Password must be at between " + User.MIN_PASSWORD_LENGTH
                     + " and " + User.MAX_PASSWORD_LENGTH +" chars long", BAD_REQUEST);
+
+        if (user.isAdmin() && !currentUser().isAdmin())
+            return new ResponseEntity<>("Only Admin may create/update Admins", BAD_REQUEST);
+
+        if (user.isManager() && !currentUser().isManager())
+            return new ResponseEntity<>("Only Manager may create/update Managers", BAD_REQUEST);
 
         return null;
     }

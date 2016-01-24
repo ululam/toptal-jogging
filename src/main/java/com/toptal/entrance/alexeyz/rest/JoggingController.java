@@ -21,8 +21,8 @@ import java.util.List;
 import static org.springframework.http.HttpStatus.*;
 
 /**
- * REST Jog API
- *
+ * REST API for Jog records
+ * <br>
  * @author alexey.zakharchenko@gmail.com
  */
 @RestController
@@ -36,6 +36,17 @@ public class JoggingController {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * <i>GET /rest/jog/list?from=2015-01-01&amp;to=2016-02-01</i>
+     * <br><br>
+     *
+     * Lists current user's jog records
+     *
+     * @param from From date, yyyy-MM-dd (optional)
+     * @param to To date, yyyy-MM-dd (optional)
+     *
+     * @return List of Jog entities as JSON
+     */
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")
@@ -51,6 +62,16 @@ public class JoggingController {
         return new ResponseEntity<>(jogs, OK);
     }
 
+    /**
+     * <i>GET /rest/jog/listall?from=2015-01-01&amp;to=2016-02-01</i>
+     * <br><br>
+     * Lists all users' jog records. You must have Admin authorities to access this method
+     *
+     * @param from From date, yyyy-MM-dd (optional)
+     * @param to To date, yyyy-MM-dd (optional)
+     *
+     * @return List of Jog entities as JSON
+     */
     @RequestMapping(value = "/listall", method = RequestMethod.GET)
     @ResponseBody
     @PreAuthorize("hasAuthority('admin')")
@@ -67,6 +88,14 @@ public class JoggingController {
     }
 
 
+    /**
+     * <i>GET /rest/jog/weeks</i>
+     * <br>
+     * <br>
+     * Returns current user's week reports for all recorded Jogs
+     *
+     * @return List of Week reports as JSON
+     */
     @RequestMapping(value = "/weeks", method = RequestMethod.GET)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")
@@ -76,6 +105,14 @@ public class JoggingController {
         return new ResponseEntity<>(weeks, OK);
     }
 
+    /**
+     * <i>POST /rest/jog/</i>
+     * <br>
+     * <br>
+     * @param jog JSON representing Jog object
+     *
+     * @return Saved Jog object as JSON
+     */
     @RequestMapping(value = "/", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     @PreAuthorize("hasAuthority('user')")
     public ResponseEntity create(@RequestBody Jog jog) {
@@ -90,6 +127,15 @@ public class JoggingController {
         return new ResponseEntity<>(jog, OK);
     }
 
+
+    /**
+     * <i>PUT /rest/jog/</i>
+     * <br>
+     * <br>
+     * @param jog JSON representing Jog object
+     *
+     * @return Saved Jog object as JSON; 404 if the given Jog is not found in DB
+     */
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")
@@ -103,6 +149,14 @@ public class JoggingController {
         return new ResponseEntity<>(OK);
     }
 
+    /**
+     * <i>DELETE /rest/jog/{id}</i>
+     * <br>
+     * <br>
+     * @param id Jog id to delete
+     *
+     * @return HTTP OK; 404 if the given Jog is not found in DB
+     */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")

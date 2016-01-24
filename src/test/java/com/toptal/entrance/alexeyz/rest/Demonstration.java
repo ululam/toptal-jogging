@@ -18,13 +18,13 @@ import static com.toptal.entrance.alexeyz.rest.RestTestUtils.*;
  */
 public class Demonstration {
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void showList() {
         Object res = fetch("/jog/list");
         System.out.println(JsonFormatter.prettyPrint(String.valueOf(res)));
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void addJog() {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(createHeaders("admin", "admin"));
@@ -36,7 +36,7 @@ public class Demonstration {
         System.out.println(jog);
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void deleteJog() {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(createHeaders("admin", "admin"));
@@ -46,7 +46,7 @@ public class Demonstration {
         restTemplate.delete(url, Collections.singletonMap("id", 1));
     }
 
-    @Test(enabled = true)
+    @Test(enabled = false)
     public void updateJog() {
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<String> request = new HttpEntity<>(createHeaders("admin", "admin"));

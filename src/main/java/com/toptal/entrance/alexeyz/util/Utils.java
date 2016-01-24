@@ -11,6 +11,8 @@ import java.util.function.Function;
 import static java.lang.String.valueOf;
 
 /**
+ * Various utilities used basically for inner purposes
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 public final class Utils {

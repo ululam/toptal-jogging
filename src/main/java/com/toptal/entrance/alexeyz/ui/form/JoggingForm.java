@@ -50,14 +50,24 @@ public class JoggingForm extends AbstractForm<Jog> {
             @Override
             protected Number convertToNumber(String value, Class<? extends Number> targetType, Locale locale) throws ConversionException {
                 try {
-                    return (int) (Float.valueOf(value) * 60 * 1000);
+                    String[] data = value.split(":");
+                    int mins = Integer.parseInt(data[0]);
+                    int secs = 0;
+                    if (data.length > 1)
+                        secs = Integer.parseInt(data[1]);
+
+                    return (mins*60 + secs) * 1000;
+
                 } catch (Exception e) { return 0; }
 
             }
 
             @Override
             public String convertToPresentation(Long value, Class<? extends String> targetType, Locale locale) throws ConversionException {
-                return String.format("%.1f", (float)value / 60_000);
+                long mins = value / 60_000;
+                long secs = (value - mins*60_000) / 1000;
+
+                return String.format("%02d:%02d", mins, secs);
             }
         });
 
