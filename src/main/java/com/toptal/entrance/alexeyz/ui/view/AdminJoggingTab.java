@@ -21,6 +21,8 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.toptal.entrance.alexeyz.util.UserUtil.currentUser;
+
 /**
  * Shows joggings for all users
  *
@@ -33,6 +35,7 @@ class AdminJoggingTab extends MVerticalLayout {
             .setSortableProperties("id", "date", "userId")
             .withFullWidth();
 
+    private Button addNewButton = new MButton(FontAwesome.PLUS, this::add);
     private Button editButton = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
     private Button deleteButton = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete this entry?", this::remove);
@@ -49,7 +52,7 @@ class AdminJoggingTab extends MVerticalLayout {
     }
 
     AdminJoggingTab init() {
-        addComponent(new MHorizontalLayout(editButton, deleteButton, fromDateField, toDateField));
+        addComponent(new MHorizontalLayout(addNewButton, editButton, deleteButton, fromDateField, toDateField));
         addComponent(joggingTable);
         expand(joggingTable);
 
@@ -114,6 +117,11 @@ class AdminJoggingTab extends MVerticalLayout {
 
     private void edit(Button.ClickEvent e) {
         edit(joggingTable.getValue());
+    }
+
+    private void add(Button.ClickEvent clickEvent) {
+        Jog jog = new Jog(currentUser().getId(), new Date(), 0, 0);
+        edit(jog);
     }
 
     private void remove(Button.ClickEvent e) {

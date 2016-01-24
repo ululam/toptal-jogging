@@ -18,7 +18,6 @@ import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -130,11 +129,7 @@ class JoggingTab extends MVerticalLayout {
     }
 
     private void add(Button.ClickEvent clickEvent) {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date(0));
-
-        Jog jog = new Jog(currentUser().getId(), new Date(), 0, 0);
-        edit(jog);
+        edit( new Jog(currentUser().getId(), new Date(), 0, 0) );
     }
 
 

@@ -1,6 +1,7 @@
 package com.toptal.entrance.alexeyz.ui.form;
 
 import com.toptal.entrance.alexeyz.domain.Jog;
+import com.toptal.entrance.alexeyz.util.UserUtil;
 import com.vaadin.data.util.converter.StringToFloatConverter;
 import com.vaadin.data.util.converter.StringToLongConverter;
 import com.vaadin.ui.Component;
@@ -22,6 +23,8 @@ import java.util.Locale;
  */
 public class JoggingForm extends AbstractForm<Jog> {
 
+    private final TextField id = new MTextField("Id");
+    private final TextField userId = new MTextField("User Id");
     private final DateField date = new MDateField("Date");
     private final TextField distance = new MTextField("Distance, km")
             .withInputPrompt("Distance in kilometers");
@@ -29,6 +32,7 @@ public class JoggingForm extends AbstractForm<Jog> {
 
 
     public JoggingForm(Jog jog) {
+        id.setEnabled(false);
 
         setSizeUndefined();
         setEntity(jog);
@@ -76,12 +80,12 @@ public class JoggingForm extends AbstractForm<Jog> {
 
     @Override
     protected Component createContent() {
-        return new MVerticalLayout(
-                new MFormLayout(
-                        date,
-                        distance,
-                        time
-                ).withWidth(""),
+        Component[] comps = UserUtil.currentUser().isAdmin() ?
+                new Component[] {id, userId, date, distance, time} :
+                new Component[] {date, distance, time};
+
+            return new MVerticalLayout(
+                new MFormLayout(comps).withWidth(""),
                 getToolbar()
         ).withWidth("");
     }
