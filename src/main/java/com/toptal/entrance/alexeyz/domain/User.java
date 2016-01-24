@@ -1,5 +1,8 @@
 package com.toptal.entrance.alexeyz.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.toptal.entrance.alexeyz.Application;
 import com.toptal.entrance.alexeyz.util.UserUtil;
 
@@ -7,6 +10,8 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
+ * User in the system
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 @Entity
@@ -54,10 +59,12 @@ public class User {
         this.login = login;
     }
 
+    @JsonIgnore()
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty
     public void setPassword(String password) {
         this.password = password;
     }
@@ -70,6 +77,7 @@ public class User {
         this.role = role;
     }
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     public Date getCreatedAt() {
         return createdAt;
     }

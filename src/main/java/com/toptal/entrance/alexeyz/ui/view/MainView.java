@@ -11,6 +11,8 @@ import org.vaadin.viritin.layouts.MVerticalLayout;
 
 import static com.toptal.entrance.alexeyz.util.UserUtil.*;
 /**
+ * Main view (available  after login)
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 public class MainView extends MVerticalLayout {

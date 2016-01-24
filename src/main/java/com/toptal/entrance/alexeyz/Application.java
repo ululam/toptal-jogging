@@ -15,16 +15,22 @@ import java.util.Date;
 
 import static com.toptal.entrance.alexeyz.util.Utils.*;
 
+/**
+ * Application start point
+ */
 @SpringBootApplication
 public class Application {
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
-
+	/**
+	 * Whether to use password hashing or not
+	 */
 	public static final boolean PWD_HASH = false;
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class);
 	}
 
+	// Lets create some test data for convenience
 	@Bean
 	public CommandLineRunner loadData(JoggingRepository jogRepository, UserRepository userRepository) {
 		return (args) -> {

@@ -13,7 +13,10 @@ import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.toptal.entrance.alexeyz.util.UserUtil.isLoggedIn;
+
 /**
+ * "Main" UI access point
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 @SpringUI

@@ -8,7 +8,7 @@ import com.toptal.entrance.alexeyz.domain.Week;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -18,7 +18,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.*;
+
 /**
+ * REST Jog API
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 @RestController
@@ -35,11 +39,33 @@ public class JoggingController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")
-    public ResponseEntity<List<Jog>> list() {
-        List<Jog> jogs = repo.findAllWithParameters(new Date(0), new Date(), currentUser().getId());
+    public ResponseEntity<List<Jog>> list(
+            @RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+            @RequestParam(value = "to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") Date to)
+    {
+        if (from == null) from = new Date(0);
+        if (to == null) to = new Date();
 
-        return new ResponseEntity<>(jogs, HttpStatus.OK);
+        List<Jog> jogs = repo.findAllWithParameters(from, to, currentUser().getId());
+
+        return new ResponseEntity<>(jogs, OK);
     }
+
+    @RequestMapping(value = "/listall", method = RequestMethod.GET)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('admin')")
+    public ResponseEntity<List<Jog>> listAll(
+            @RequestParam(value = "from", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date from,
+            @RequestParam(value = "to", required = false)  @DateTimeFormat(pattern = "yyyy-MM-dd") Date to)
+    {
+        if (from == null) from = new Date(0);
+        if (to == null) to = new Date();
+
+        List<Jog> jogs = repo.findAllWithParameters(from, to);
+
+        return new ResponseEntity<>(jogs, OK);
+    }
+
 
     @RequestMapping(value = "/weeks", method = RequestMethod.GET)
     @ResponseBody
@@ -47,51 +73,51 @@ public class JoggingController {
     public ResponseEntity<List<Week>> weeks() {
         List<Week> weeks = repo.getWeeks(currentUser().getId());
 
-        return new ResponseEntity<>(weeks, HttpStatus.OK);
+        return new ResponseEntity<>(weeks, OK);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
     @PreAuthorize("hasAuthority('user')")
-    public ResponseEntity<Jog> create(@RequestBody Jog jog) {
+    public ResponseEntity create(@RequestBody Jog jog) {
         long currentUserId = currentUser().getId();
         if (jog.getUserId() == null)
             jog.setUserId(currentUserId);
         else if (!jog.getUserId().equals(currentUserId))
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("You cannot create jogs for others", FORBIDDEN);
 
         jog = repo.save(jog);
 
-        return new ResponseEntity<>(jog, HttpStatus.OK);
+        return new ResponseEntity<>(jog, OK);
     }
 
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")
-    public ResponseEntity<Void> update(@RequestBody Jog jog) {
+    public ResponseEntity update(@RequestBody Jog jog) {
         if (jog.getId() == null || repo.findOne(jog.getId()) == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Jog with the given id does not exist: " + jog.getId(), NOT_FOUND);
         }
 
-        jog = repo.save(jog);
+        repo.save(jog);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(OK);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     @PreAuthorize("hasAuthority('user')")
-    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
+    public ResponseEntity delete(@PathVariable("id") long id) {
         Jog jog = repo.findOne(id);
         if (jog == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Jog with the given id does not exist: " + id, NOT_FOUND);
         }
 
-        if (!jog.getUserId().equals(currentUser().getId()))
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        if (!currentUser().isAdmin() && !jog.getUserId().equals(currentUser().getId()))
+            return new ResponseEntity<>("You cannot delete others' jogs", FORBIDDEN);
 
         repo.delete(id);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(OK);
     }
 
     private User currentUser() {

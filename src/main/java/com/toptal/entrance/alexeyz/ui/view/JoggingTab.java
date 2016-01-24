@@ -25,6 +25,8 @@ import java.util.Locale;
 import static com.toptal.entrance.alexeyz.util.UserUtil.currentUser;
 
 /**
+ * Shows current users' runs
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 class JoggingTab extends MVerticalLayout {

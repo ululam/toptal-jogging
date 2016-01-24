@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
+ * Add/edit Jog
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 public class JoggingForm extends AbstractForm<Jog> {

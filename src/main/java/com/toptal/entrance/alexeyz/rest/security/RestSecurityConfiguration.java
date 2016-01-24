@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Configures RESP API security via Spring autoconfiguraion
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 @Configuration

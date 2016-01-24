@@ -14,6 +14,8 @@ import org.vaadin.viritin.layouts.MVerticalLayout;
 import java.util.Arrays;
 
 /**
+ * Add/edit User
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 public class UserForm extends AbstractForm<User> {

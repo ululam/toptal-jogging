@@ -1,10 +1,14 @@
 package com.toptal.entrance.alexeyz.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.Transient;
 import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * Aggregate entity for weekly reports
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 public class Week {
@@ -42,10 +46,12 @@ public class Week {
         return time;
     }
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     public Date getStart() {
         return start;
     }
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     public Date getEnd() {
         return end;
     }

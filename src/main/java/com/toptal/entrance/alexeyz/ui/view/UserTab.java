@@ -10,9 +10,13 @@ import org.vaadin.viritin.fields.MTable;
 import org.vaadin.viritin.layouts.MHorizontalLayout;
 import org.vaadin.viritin.layouts.MVerticalLayout;
 
-import static com.toptal.entrance.alexeyz.util.UserUtil.*;
+import java.util.List;
+
+import static com.toptal.entrance.alexeyz.util.UserUtil.currentUser;
 
 /**
+ * Tabs that displays list of users
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 class UserTab extends MVerticalLayout {
@@ -48,7 +52,9 @@ class UserTab extends MVerticalLayout {
     }
 
     private void reloadUsers() {
-        usersTable.setBeans(view.ui.userRepository.findAll());
+        List<User> users = view.ui.userRepository.findAll();
+        users.forEach(u -> u.setPassword(null));
+        usersTable.setBeans(users);
 
         adjustActionButtonState();
     }
@@ -77,9 +83,7 @@ class UserTab extends MVerticalLayout {
     private void remove(Button.ClickEvent e) {
         if (usersTable.getValue() != null) {
             long userId = usersTable.getValue().getId();
-            // Delete associated joggings (curently I don't rely upon many-to-one cascading)
             view.ui.userRepository.delete(userId);
-//            view.ui.joggingRepository.deleteByUserId(userId);
             usersTable.setValue(null);
             reloadUsers();
         }

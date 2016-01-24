@@ -16,9 +16,10 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
 
 /**
+ * Login and signup view
+ *
  * @author alexey.zakharchenko@gmail.com
  */
-
 public class LoginView extends VerticalLayout {
 
     private TextField usernameField;

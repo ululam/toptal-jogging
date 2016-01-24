@@ -1,5 +1,7 @@
 package com.toptal.entrance.alexeyz.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -57,6 +59,7 @@ public class Jog {
         this.time = time;
     }
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     public Date getDate() {
         return date;
     }

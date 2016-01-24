@@ -5,6 +5,7 @@ import com.toptal.entrance.alexeyz.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -13,11 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 
 /**
- * @author alexey.zakharchenko@gmail.com
+ * * REST User API
  *
+ * @author alexey.zakharchenko@gmail.com
  */
 @RestController
 @RequestMapping("/rest/user/")
@@ -35,10 +39,15 @@ public class UserController {
 
     @RequestMapping(value = "/", method = RequestMethod.POST)
     // Anyone may create users
-    public ResponseEntity<User> create(@RequestBody User user) {
+    public ResponseEntity create(@RequestBody User user) {
         User existing = userRepository.findByLogin(user.getLogin());
-        if (existing != null)
-            throw new IllegalArgumentException("User with the given login already exists: " + user.getLogin());
+        if (existing != null) {
+            return new ResponseEntity<>("User with the given login already exists: " + user.getLogin(), HttpStatus.BAD_REQUEST);
+        }
+
+        ResponseEntity error = validate(user);
+        if (error != null)
+            return error;
 
         user = userRepository.save(user);
 
@@ -47,15 +56,15 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('manager')")
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
+    public ResponseEntity delete(@PathVariable("id") long id) {
         User user = userRepository.findOne(id);
         // Don't delete admins
         if (user.isAdmin())
-            throw new IllegalArgumentException("Its prohibited to delete Admins");
+            return new ResponseEntity<>("Its prohibited to delete Admins", BAD_REQUEST);
 
         // Don't delete yourself
         if (currentUser().getId().equals(id))
-            throw new IllegalArgumentException("You cannot delete yourself");
+            return new ResponseEntity<>("You cannot delete yourself", BAD_REQUEST);
 
 
         userRepository.delete(id);
@@ -65,21 +74,38 @@ public class UserController {
 
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('manager')")
-    public ResponseEntity<User> update(@RequestBody User user) {
-        User existing = userRepository.findByLogin(user.getLogin());
-        if (existing != null)
-            throw new IllegalArgumentException("User with the given login already exists: " + user.getLogin());
+    public ResponseEntity update(@RequestBody User user) {
+        User existing = userRepository.findOne(user.getId());
+        if (existing == null)
+            return new ResponseEntity<>("User with the given id does not exist: " + user.getId(), NOT_FOUND);
 
         User current = currentUser();
         if (!current.isManager() && current.getId().equals(user.getId()))
             // For simple users, its prohibited to update others
-            throw new IllegalAccessError("You should be at least Manager to update others");
+            return new ResponseEntity<>("You should be at least Manager to update others", BAD_REQUEST);
+
+        ResponseEntity error = validate(user);
+        if (error != null)
+            return error;
+
 
         user = userRepository.save(user);
 
         return new ResponseEntity<>(user, OK) ;
     }
 
+
+    private ResponseEntity validate(User user) {
+        if (user.getLogin() == null || user.getLogin().length() < User.MIN_LOGIN_LENGTH)
+            return new ResponseEntity<>("Login must be at least " + User.MIN_LOGIN_LENGTH + " chars long", BAD_REQUEST);
+
+        if (user.getPassword() == null || user.getPassword().length() < User.MIN_PASSWORD_LENGTH
+                || user.getPassword().length() > User.MAX_PASSWORD_LENGTH)
+            return new ResponseEntity<>("Password must be at between " + User.MIN_PASSWORD_LENGTH
+                    + " and " + User.MAX_PASSWORD_LENGTH +" chars long", BAD_REQUEST);
+
+        return null;
+    }
 
     private User currentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

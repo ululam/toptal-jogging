@@ -13,6 +13,8 @@ import java.text.DateFormat;
 import java.util.Locale;
 
 /**
+ * Weekly reports tab
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 public class WeekTab extends MVerticalLayout {

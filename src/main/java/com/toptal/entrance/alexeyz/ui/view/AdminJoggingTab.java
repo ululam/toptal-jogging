@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
+ * Shows joggings for all users
+ *
  * @author alexey.zakharchenko@gmail.com
  */
 class AdminJoggingTab extends MVerticalLayout {
