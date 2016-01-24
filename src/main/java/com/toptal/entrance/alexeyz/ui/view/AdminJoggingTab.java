@@ -26,14 +26,16 @@ import java.util.Locale;
  */
 class AdminJoggingTab extends MVerticalLayout {
     private MTable<Jog> joggingTable = new MTable<>(Jog.class)
-            .withProperties("userId", "date", "distance", "time", "averageSpeed")
-            .withColumnHeaders("UserId", "Date", "Distance, km", "Time", "Average Speed, km/h")
-            .setSortableProperties("date", "userId")
+            .withProperties("id", "userId", "date", "distance", "time", "averageSpeed")
+            .withColumnHeaders("Id", "UserId", "Date", "Distance, km", "Time", "Average Speed, km/h")
+            .setSortableProperties("id", "date", "userId")
             .withFullWidth();
 
     private Button editButton = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
     private Button deleteButton = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete this entry?", this::remove);
+
+    private Button refreshButton = new MButton(FontAwesome.REFRESH, (e) -> reloadData());
 
     private DateField fromDateField = new MDateField("From").withIcon(FontAwesome.ARROW_LEFT);
     private DateField toDateField = new MDateField("To").withIcon(FontAwesome.ARROW_RIGHT);;

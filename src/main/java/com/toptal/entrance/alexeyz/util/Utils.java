@@ -14,6 +14,14 @@ import static java.lang.String.valueOf;
  * @author alexey.zakharchenko@gmail.com
  */
 public final class Utils {
+    public static final long S = 1000;
+    public static final long M = 60*S;
+    public static final long H = 60*M;
+    public static final long D = 24*H;
+    public static final long MO = 30*D;
+    public static final long Y = 12*MO;
+
+
     public static String s(Object obj) {
         StringBuilder b = new StringBuilder("[");
         for (Field f : obj.getClass().getFields()) {

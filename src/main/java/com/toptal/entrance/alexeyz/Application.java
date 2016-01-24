@@ -1,9 +1,9 @@
 package com.toptal.entrance.alexeyz;
 
-import com.toptal.entrance.alexeyz.domain.Jog;
-import com.toptal.entrance.alexeyz.domain.User;
 import com.toptal.entrance.alexeyz.db.JoggingRepository;
 import com.toptal.entrance.alexeyz.db.UserRepository;
+import com.toptal.entrance.alexeyz.domain.Jog;
+import com.toptal.entrance.alexeyz.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -12,23 +12,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import java.util.Date;
-import java.util.TimeZone;
 
-import static com.toptal.entrance.alexeyz.util.Utils.t;
+import static com.toptal.entrance.alexeyz.util.Utils.*;
 
 @SpringBootApplication
 public class Application {
-	private static final long S = 1000;
-	private static final long M = 60*S;
-	private static final long H = 60*M;
-	private static final long D = 24*H;
-	private static final long MO = 30*D;
-	private static final long Y = 12*MO;
-
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+	public static final boolean PWD_HASH = false;
+
 	public static void main(String[] args) {
-		TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
 		SpringApplication.run(Application.class);
 	}
 
@@ -39,7 +32,7 @@ public class Application {
 			User manager = userRepository.save(new User("manager", "manager", User.Role.manager, new Date()));
 			User user = userRepository.save(new User("user", "user", User.Role.user, new Date()));
 
-			jogRepository.save(new Jog(user.getId(), new Date(), 3, 13*M));
+			jogRepository.save(new Jog(user.getId(), new Date(), 3, 13* M));
 			jogRepository.save(new Jog(user.getId(), new Date(t()-D), 10, H));
 			jogRepository.save(new Jog(user.getId(), new Date(t()-3*D), 42, 3*H+59*M+13*S));
 

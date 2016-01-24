@@ -1,11 +1,18 @@
 package com.toptal.entrance.alexeyz.rest;
 
-import com.toptal.entrance.alexeyz.domain.Jog;
-import com.toptal.entrance.alexeyz.domain.Week;
 import com.toptal.entrance.alexeyz.db.JoggingRepository;
+import com.toptal.entrance.alexeyz.db.UserRepository;
+import com.toptal.entrance.alexeyz.domain.Jog;
+import com.toptal.entrance.alexeyz.domain.User;
+import com.toptal.entrance.alexeyz.domain.Week;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -15,56 +22,81 @@ import java.util.List;
  * @author alexey.zakharchenko@gmail.com
  */
 @RestController
+@RequestMapping("/rest/jog/")
 public class JoggingController {
     private static final Logger log = LoggerFactory.getLogger(JoggingController.class);
 
-    private final JoggingRepository repo;
+    @Autowired
+    private JoggingRepository repo;
 
     @Autowired
-    public JoggingController(JoggingRepository repo) {
-        this.repo = repo;
+    private UserRepository userRepository;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('user')")
+    public ResponseEntity<List<Jog>> list() {
+        List<Jog> jogs = repo.findAllWithParameters(new Date(0), new Date(), currentUser().getId());
+
+        return new ResponseEntity<>(jogs, HttpStatus.OK);
     }
 
-    @RequestMapping("/jog/list")
-    public List<Jog> list() {
-        return repo.findAllWithParameters(new Date(0), new Date(), 0);
+    @RequestMapping(value = "/weeks", method = RequestMethod.GET)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('user')")
+    public ResponseEntity<List<Week>> weeks() {
+        List<Week> weeks = repo.getWeeks(currentUser().getId());
+
+        return new ResponseEntity<>(weeks, HttpStatus.OK);
     }
 
-    @RequestMapping("/week/list")
-    public List<Week> weeks() {
-        return repo.getWeeks(0);
+    @RequestMapping(value = "/", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
+    @PreAuthorize("hasAuthority('user')")
+    public ResponseEntity<Jog> create(@RequestBody Jog jog) {
+        long currentUserId = currentUser().getId();
+        if (jog.getUserId() == null)
+            jog.setUserId(currentUserId);
+        else if (!jog.getUserId().equals(currentUserId))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        jog = repo.save(jog);
+
+        return new ResponseEntity<>(jog, HttpStatus.OK);
     }
 
-
-    @RequestMapping(value = "/jog/", method = RequestMethod.POST)
-    public Jog create(@RequestBody Jog jog) {
-        return repo.save(jog);
-    }
-
-    @RequestMapping(value = "/jog/{id}", method = RequestMethod.PUT)
-    public Jog update(@PathVariable("id") long id, @RequestBody Jog jog) {
-        Jog existingJog = repo.findOne(id);
-        if (existingJog == null) {
-            throw new IllegalArgumentException("Jog with id = " + id + " not found");
+    @RequestMapping(value = "/", method = RequestMethod.PUT)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('user')")
+    public ResponseEntity<Void> update(@RequestBody Jog jog) {
+        if (jog.getId() == null || repo.findOne(jog.getId()) == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        repo.save( existingJog.copyFrom(jog) );
+        jog = repo.save(jog);
 
-        return existingJog;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/jog/{id}", method = RequestMethod.DELETE)
-    public Jog delete(@PathVariable("id") long id) {
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
+    @PreAuthorize("hasAuthority('user')")
+    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
         Jog jog = repo.findOne(id);
         if (jog == null) {
-            log.warn("Jog with id {} not found", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        if (!jog.getUserId().equals(currentUser().getId()))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         repo.delete(id);
 
-        return jog;
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    private User currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-
+        return userRepository.findByLogin(auth.getName());
+    }
 }

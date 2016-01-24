@@ -39,6 +39,8 @@ class JoggingTab extends MVerticalLayout {
     private Button deleteButton = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete this entry?", this::remove);
 
+    private Button refreshButton = new MButton(FontAwesome.REFRESH, (e) -> reloadData());
+
     private DateField fromDateField = new MDateField("From").withIcon(FontAwesome.ARROW_LEFT);
     private DateField toDateField = new MDateField("To").withIcon(FontAwesome.ARROW_RIGHT);;
 
@@ -132,6 +134,7 @@ class JoggingTab extends MVerticalLayout {
         Jog jog = new Jog(currentUser().getId(), new Date(), 0, 0);
         edit(jog);
     }
+
 
     private void edit(Button.ClickEvent e) {
         edit(joggingTable.getValue());

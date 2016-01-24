@@ -1,5 +1,6 @@
 package com.toptal.entrance.alexeyz.domain;
 
+import com.toptal.entrance.alexeyz.Application;
 import com.toptal.entrance.alexeyz.util.UserUtil;
 
 import javax.persistence.*;
@@ -90,8 +91,20 @@ public class User {
     @PrePersist
     @PreUpdate
     void encryptPassword() {
-        if (password.length() < MAX_PASSWORD_LENGTH)
-            // It means password is not hashed
-            setPassword(UserUtil.hash(password));
+        if (Application.PWD_HASH)
+            if (password.length() < MAX_PASSWORD_LENGTH)
+                // It means password is not hashed
+                setPassword(UserUtil.hash(password));
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", role=" + role +
+                ", createdAt=" + createdAt +
+                '}';
     }
 }

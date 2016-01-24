@@ -23,10 +23,11 @@ class UserTab extends MVerticalLayout {
             .withFullWidth();
 
 
-    private Button addNew = new MButton(FontAwesome.PLUS, this::add);
-    private Button edit = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
-    private Button delete = new ConfirmButton(FontAwesome.TRASH_O,
+    private Button addNewButton = new MButton(FontAwesome.PLUS, this::add);
+    private Button editButton = new MButton(FontAwesome.PENCIL_SQUARE_O, this::edit);
+    private Button deleteButton = new ConfirmButton(FontAwesome.TRASH_O,
             "Are you sure you want to delete this user?", this::remove);
+    private Button refreshButton = new MButton(FontAwesome.REFRESH, (e) -> reloadUsers());
 
 
     private final MainView view;
@@ -36,7 +37,7 @@ class UserTab extends MVerticalLayout {
     }
 
     UserTab init() {
-        addComponent(new MHorizontalLayout(addNew, edit, delete));
+        addComponent(new MHorizontalLayout(addNewButton, editButton, deleteButton, refreshButton));
         addComponent(usersTable);
 
         reloadUsers();
@@ -60,8 +61,8 @@ class UserTab extends MVerticalLayout {
             isMe = currentUser().getId().equals(usersTable.getValue().getId());
             isAdmin = usersTable.getValue().isAdmin();
         }
-        edit.setEnabled(hasSelection);
-        delete.setEnabled(hasSelection && !isMe && !isAdmin);
+        editButton.setEnabled(hasSelection);
+        deleteButton.setEnabled(hasSelection && !isMe && !isAdmin);
     }
 
     private void add(Button.ClickEvent clickEvent) {

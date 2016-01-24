@@ -1,7 +1,5 @@
 package com.toptal.entrance.alexeyz.domain;
 
-import com.toptal.entrance.alexeyz.util.Utils;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -27,7 +25,7 @@ public class Jog {
 
     private Date date;
 
-    private long userId;
+    private Long userId;
 
     public Jog() {}
 
@@ -63,24 +61,16 @@ public class Jog {
         return date;
     }
 
-    public long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public Jog copyFrom(Jog jog) {
-        this.distance = jog.distance;
-        this.time = jog.time;
-        this.date = jog.date;
-
-        return this;
     }
 
     @Transient
@@ -93,6 +83,12 @@ public class Jog {
 
     @Override
     public String toString() {
-        return Utils.s(this);
+        return "Jog{" +
+                "id=" + id +
+                ", distance=" + distance +
+                ", time=" + time +
+                ", date=" + date +
+                ", userId=" + userId +
+                '}';
     }
 }

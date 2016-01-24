@@ -1,5 +1,6 @@
 package com.toptal.entrance.alexeyz.ui.view;
 
+import com.toptal.entrance.alexeyz.Application;
 import com.toptal.entrance.alexeyz.domain.User;
 import com.toptal.entrance.alexeyz.util.UserUtil;
 import com.vaadin.data.Validator;
@@ -97,7 +98,10 @@ public class LoginView extends VerticalLayout {
     public void userLoginRequested(String login, String password) {
         if (!validate()) return;
 
-        User user = ui.userRepository.findByLoginAndPassword(login, UserUtil.hash(password));
+        String pwd = Application.PWD_HASH ? UserUtil.hash(password) : password;
+
+        User user = ui.userRepository.findByLoginAndPassword(login, pwd);
+
         if (user != null) {
             VaadinSession.getCurrent().setAttribute(User.class.getName(), user);
             ui.updateContent();
