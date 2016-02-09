@@ -20,6 +20,7 @@ public class MainView extends MVerticalLayout {
     private JoggingTab joggingTab;
     private WeekTab weekTab;
     private AdminJoggingTab allJoggingTab;
+    private UserTab userTab;
 
     final MainUI ui;
 
@@ -39,7 +40,7 @@ public class MainView extends MVerticalLayout {
         tabsheet.addTab(weekTab);
 
         if (currentUser().isManager()) {
-            UserTab userTab = new UserTab(this)
+            userTab = new UserTab(this)
                     .init();
             userTab.setCaption("Users");
             tabsheet.addTab(userTab);
@@ -63,6 +64,7 @@ public class MainView extends MVerticalLayout {
         );
         addComponent(new MHorizontalLayout(tabsheet).expand(tabsheet));
 
+
     }
 
     // @todo Refactor to JogChangedEvent +listeners
@@ -73,4 +75,8 @@ public class MainView extends MVerticalLayout {
             allJoggingTab.reloadData();
     }
 
+    void onUserChange() {
+        if (userTab != null)
+            userTab.reloadUsers();
+    }
 }

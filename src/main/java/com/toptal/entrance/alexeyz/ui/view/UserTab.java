@@ -2,6 +2,7 @@ package com.toptal.entrance.alexeyz.ui.view;
 
 import com.toptal.entrance.alexeyz.domain.User;
 import com.toptal.entrance.alexeyz.ui.form.UserForm;
+import com.vaadin.data.Validator;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import org.vaadin.viritin.button.ConfirmButton;
@@ -51,7 +52,7 @@ class UserTab extends MVerticalLayout {
         return this;
     }
 
-    private void reloadUsers() {
+    void reloadUsers() {
         List<User> users = view.ui.userRepository.findAll();
         users.forEach(u -> u.setPassword(null));
         usersTable.setBeans(users);
@@ -93,14 +94,35 @@ class UserTab extends MVerticalLayout {
         if (entry == null)
             return;
 
-        UserForm form = new UserForm(entry);
+        UserForm form = new UserForm(entry, new LoginValidator(entry));
         form.setSavedHandler(this::saveEntry);
         form.setResetHandler(this::resetEntry);
 
         form.openInModalPopup();
     }
 
+    private class LoginValidator implements Validator {
+        private final User user;
+
+        public LoginValidator(User user) {
+            this.user = user;
+        }
+
+        @Override
+        public void validate(Object o) throws InvalidValueException {
+            String login = String.valueOf(o);
+            User another = view.ui.userRepository.findByLogin(login);
+            if (another != null && !another.getId().equals(user.getId())) {
+                throw new Validator.InvalidValueException("User with the given login already exists: " + login);
+            }
+        }
+    }
+
+    private void validatateLogin(Object o) {
+    }
+
     private void saveEntry(User entry) {
+
         view.ui.userRepository.save(entry);
 
         reloadUsers();
@@ -111,5 +133,4 @@ class UserTab extends MVerticalLayout {
         reloadUsers();
         view.ui.closeWindow();
     }
-
 }

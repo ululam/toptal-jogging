@@ -2,6 +2,7 @@ package com.toptal.entrance.alexeyz.ui.view;
 
 import com.toptal.entrance.alexeyz.db.JoggingRepository;
 import com.toptal.entrance.alexeyz.db.UserRepository;
+import com.toptal.entrance.alexeyz.rest.security.UserService;
 import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -31,6 +32,9 @@ public class MainUI extends UI {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    UserService userService;
 
     @Override
     protected void init(VaadinRequest request) {

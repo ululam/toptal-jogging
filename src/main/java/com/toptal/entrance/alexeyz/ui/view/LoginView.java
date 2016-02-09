@@ -113,8 +113,6 @@ public class LoginView extends VerticalLayout {
     }
 
     public void userSignupRequested(String login, String password) {
-        if (!validate()) return;
-
         User user = ui.userRepository.findByLogin(login);
         if (user != null) {
             showError("User with login '" + login + "' already exists");

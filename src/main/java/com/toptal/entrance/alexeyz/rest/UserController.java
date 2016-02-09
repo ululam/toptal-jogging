@@ -1,7 +1,10 @@
 package com.toptal.entrance.alexeyz.rest;
 
+import com.toptal.entrance.alexeyz.Application;
 import com.toptal.entrance.alexeyz.db.UserRepository;
 import com.toptal.entrance.alexeyz.domain.User;
+import com.toptal.entrance.alexeyz.rest.security.jwt.TokenUtil;
+import com.toptal.entrance.alexeyz.util.UserUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 /**
  * REST User API
@@ -53,7 +54,7 @@ public class UserController {
      * No authorization required for this method (everyone can create user and use it later for accessing API)
      *
      * @param user User object as JSON
-     * @return Created User as JSON; 400 if login already exist, login or pwd are too short/long,
+     * @return JWT token on succes; 400 if login already exist, login or pwd are too short/long,
      * on attempt to create Manager/Admin if current user is not Manager/Admin
      */
 
@@ -72,7 +73,29 @@ public class UserController {
 
         user = userRepository.save(user);
 
-        return new ResponseEntity<>(user, OK);
+        return new ResponseEntity<>(TokenUtil.createTokenForUser(user.getLogin()), OK);
+    }
+
+    /**
+     * <i>POST /rest/user/login</i>
+     * <br>
+     * <br>
+     * No authorization required for this method (everyone can login for accessing API)
+     *
+     * @param user User object as JSON (login and password fields only have sense)
+     * @return JWT token on success; 403 if login failed
+     */
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    // Anyone may login
+    public ResponseEntity login(@RequestBody User user) {
+        String pwd = Application.PWD_HASH ? UserUtil.hash(user.getPassword()) : user.getPassword();
+        User existing = userRepository.findByLoginAndPassword(user.getLogin(), pwd);
+        if (existing == null) {
+            return new ResponseEntity<>("User with the given login and password not found", HttpStatus.FORBIDDEN);
+        }
+
+        return new ResponseEntity<>(TokenUtil.createTokenForUser(user.getLogin()), OK);
     }
 
     /**
@@ -117,11 +140,13 @@ public class UserController {
     @RequestMapping(value = "/", method = RequestMethod.PUT)
     @PreAuthorize("hasAuthority('manager')")
     public ResponseEntity update(@RequestBody User user) {
-        User existing = userRepository.findOne(user.getId());
-        if (existing == null)
+        if (user.getId() == null || userRepository.findOne(user.getId()) == null)
             return new ResponseEntity<>("User with the given id does not exist: " + user.getId(), NOT_FOUND);
 
-        User current = currentUser();
+        User existing = userRepository.findByLogin(user.getLogin());
+        if (existing != null && !existing.getId().equals(user.getId()))
+            return new ResponseEntity<>("User with the given login already exists: " + user.getLogin(), BAD_REQUEST);
+
 
         ResponseEntity error = validate(user);
         if (error != null)
@@ -143,10 +168,12 @@ public class UserController {
             return new ResponseEntity<>("Password must be at between " + User.MIN_PASSWORD_LENGTH
                     + " and " + User.MAX_PASSWORD_LENGTH +" chars long", BAD_REQUEST);
 
-        if (user.isAdmin() && !currentUser().isAdmin())
+        User current = currentUser();
+
+        if (user.isAdmin() && (current == null || !currentUser().isAdmin()) )
             return new ResponseEntity<>("Only Admin may create/update Admins", BAD_REQUEST);
 
-        if (user.isManager() && !currentUser().isManager())
+        if (user.isManager() && (current == null || !currentUser().isManager()) )
             return new ResponseEntity<>("Only Manager may create/update Managers", BAD_REQUEST);
 
         return null;
